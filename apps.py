@@ -1,5 +1,6 @@
 from flask import Flask, render_template,request
 import crwal
+from send_mail_smtp import sendmail
 
 app = Flask(__name__)
 
@@ -27,8 +28,11 @@ def start_crawling():
         request_email.append(email)
         crwal.test() # 크롤링을 흉내내는 5초 대기
         print("크롤링 완료!")
+        sendmail(request_email)
+        print("메일 전송 완료")
         print(request_email)
     finally:
+        request_email = []
         is_crawling = False  # 크롤링 종료 후 변수 값 변경
     return "크롤링이 완료되었습니다."
 
