@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask 출력 테스트</title>
+</head>
+<body>
+    <h1>예약 추가하기</h1>
+    <!-- <p>{{ message }}</p> </body>
+    <ul>
+        {% for x in range(10) %}
+            <li>{{ x }}</li>
+        {% endfor%}
+    </ul> -->
+    <form action="/finish_reservation" method="POST">
+        <input type="text" id="email" name="email">
+        <button>확인</button>
+    </form>
+    {% for x in email_list %}
+            <li>{{ x }}</li>
+    {% endfor%}
+</body>
+</html>
