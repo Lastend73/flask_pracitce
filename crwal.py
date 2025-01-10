@@ -10,6 +10,10 @@ from fake_useragent import UserAgent
 
 import time
 import csv
+import re
+
+from datetime import datetime
+import pprint
 
 def get_random_user_agent():
     ua = UserAgent()
@@ -29,7 +33,7 @@ def test() :
     #스크롤 내리기 이동 전 위치
     scroll_location = driver.execute_script("return document.body.scrollHeight")
     event_count = int(driver.find_element(By.XPATH,'//*[@id="screenMain"]/div/h1/span').text.replace(",",""))
-    event_count = 20 
+    # event_count = 20 
     print(event_count)
     if event_count > 20 :
         more_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="screenMain"]/div/div[2]/button')))
@@ -44,7 +48,7 @@ def test() :
         driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
 
         #전체 스크롤이 늘어날 때까지 대기
-        time.sleep(2)
+        time.sleep(10)
 
         #늘어난 스크롤 높이
         scroll_height = driver.execute_script("return document.body.scrollHeight")
@@ -87,18 +91,28 @@ def test() :
             info = []
             # 버튼 클릭하여 병원 정보 추출
             for a in range(len(price)) :
-                info.append([option_name[a].text,price[a].text[0:-1]])
+                option_delete_blank = option_name[a].text.replace(" ","")
+                if "체험" in option_delete_blank :
+                    print(option_delete_blank)
+                    continue
+                info.append([option_delete_blank,price[a].text[0:-1]])
 
             more_button = driver.find_element(By.XPATH,'//*[@id="screenMain"]/div[1]/a/span/div')
             driver.execute_script("arguments[0].click();", more_button)
 
             hospital_name = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="hospital-page-text-title-hospitalname"]'))).text
-            hospital_address = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, 'iMmBCJ '))).text
-
+            hospital_address_full = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, 'iMmBCJ '))).text
+            hospital_address = hospital_address_full.split(" ")
             for b in info:
                 b.insert(0,hospital_name)
-                b.insert(1,hospital_address)
+                b.insert(1,hospital_address_full)
+                if "서울" in hospital_address :
+                    b.insert(2,hospital_address[1])
+                else :
+                    b.insert(2,hospital_address[0])
+                
                 info_list.append(b)
+
 
             #새 창 닫기
             driver.close()
@@ -122,7 +136,6 @@ def test() :
         count_num = count_num + 1
         refuse_num = refuse_num + 1
         print(f"{count_num} / {event_count}")
-        print(refuse_num)
         if refuse_num > 50 : 
             time.sleep(180)
             refuse_num = 0
@@ -130,21 +143,26 @@ def test() :
 
     with open('강남언니.csv', 'w', encoding='cp949', newline='') as file:
         csv_writer = csv.writer(file) # 파일 객체를 csv.writer의 인자로 전달해 새로운 writer 객체를 생성
-        csv_writer.writerow(['병원명', '병원주소', '시술명','가격','옵션','샷수']) # 헤더 작성
-        option_name_filter = ["울쎄라" , "인모드" , "슈링크"]
+        csv_writer.writerow(['병원명', '병원주소', '지역','시술명','가격','옵션','샷수',"날짜"]) # 헤더 작성
+        option_name_filter = ["올리지오x", "올리지오", "덴서티하이","덴서티", "써마지", "볼뉴머", "텐써마", "세르프","인모드","슈링크"]
+        
         for row in info_list :
+            option_check = False
             for word in option_name_filter:
-                if word in row[2]:
+                if word in row[3]:
                     row.append(word)
+                    option_check = True
                     break  # 일치하는 단어를 찾으면 반복문 종료
-                else : 
-                    row.append("")
-            index = row[2].find("샷")
+            if option_check == False:
+                row.append("")    
+            index = row[3].find("샷")
             if index != -1 :
-                shot_name = row[2][index-3:index]
+                # 앞에 3글자 중 숫자만 추출
+                shot_name = re.sub(r'[^0-9]', '', row[3][index-4:index])
             else :
                 shot_name = ""
             row.append(shot_name)
+            row.append(datetime.today().strftime("%Y-%m-%d"))
             csv_writer.writerow(row)
 
     driver.quit()
