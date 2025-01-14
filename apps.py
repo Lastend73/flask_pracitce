@@ -30,12 +30,9 @@ def start_crawling():
         email = request.form.get("email")
         product = request.form.get("product")
         request_email.append(email)
-        
-        p = multiprocessing.pool.ThreadPool(4)
-        a = p.apply(crwal.test,(product,))
-        b = p.apply(crwal.test,(product,))
-        # crwal.test(product),
-        # get_data_from_yeosin()
+
+        crwal.gangnamunni_crawl()
+        get_data_from_yeosin(product)
 
         # print("크롤링 완료!")
         # sendmail(request_email)
