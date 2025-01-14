@@ -19,7 +19,7 @@ def get_random_user_agent():
     ua = UserAgent()
     return ua.random
 
-def test() : 
+def test(product_name): 
     chrome_options = Options()
     # chrome_options.add_argument("headless")
     chrome_options.add_argument(f'user-agent={get_random_user_agent}')
@@ -27,7 +27,7 @@ def test() :
     driver = webdriver.Chrome(options=chrome_options)
     driver.set_window_size(1024, 1080)
     driver.implicitly_wait(100)
-    url = 'https://www.gangnamunni.com/events?category=%EB%A6%AC%ED%94%84%ED%8C%85'
+    url = f'https://www.gangnamunni.com/events?q={product_name}'
     driver.get(url)
 
     #스크롤 내리기 이동 전 위치
@@ -86,16 +86,22 @@ def test() :
         try : 
             price = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'cHFlCn')))
             option_name = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'hZkXMs')))
+            option_name_filter = ["올리지오x", "올리지오", "덴서티하이","덴서티", "써마지", "볼뉴머", "텐써마", "세르프"]
             driver.implicitly_wait(5)
 
             info = []
             # 버튼 클릭하여 병원 정보 추출
             for a in range(len(price)) :
                 option_delete_blank = option_name[a].text.replace(" ","")
-                if "체험" in option_delete_blank :
+                if "체험" in option_delete_blank or "첫방문" in option_delete_blank :
                     print(option_delete_blank)
                     continue
-                info.append([option_delete_blank,price[a].text[0:-1]])
+                for filter_word in option_name_filter:
+                    if filter_word in option_delete_blank and "+" not in option_delete_blank:
+                        info.append([option_delete_blank,price[a].text[0:-1]])
+                        break
+                    else :
+                        print(option_delete_blank)
 
             more_button = driver.find_element(By.XPATH,'//*[@id="screenMain"]/div[1]/a/span/div')
             driver.execute_script("arguments[0].click();", more_button)
@@ -144,7 +150,7 @@ def test() :
     with open('강남언니.csv', 'w', encoding='cp949', newline='') as file:
         csv_writer = csv.writer(file) # 파일 객체를 csv.writer의 인자로 전달해 새로운 writer 객체를 생성
         csv_writer.writerow(['병원명', '병원주소', '지역','시술명','가격','옵션','샷수',"날짜"]) # 헤더 작성
-        option_name_filter = ["올리지오x", "올리지오", "덴서티하이","덴서티", "써마지", "볼뉴머", "텐써마", "세르프","인모드","슈링크"]
+        option_name_filter = ["올리지오x", "올리지오", "덴서티하이","덴서티", "써마지", "볼뉴머", "텐써마", "세르프"]
         
         for row in info_list :
             option_check = False

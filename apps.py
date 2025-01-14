@@ -1,6 +1,9 @@
+import multiprocessing.pool
 from flask import Flask, render_template,request
 import crwal
 from send_mail_smtp import sendmail
+from ticket_crwal import get_data_from_yeosin
+import multiprocessing
 
 app = Flask(__name__)
 
@@ -25,12 +28,19 @@ def start_crawling():
     is_crawling = True
     try:
         email = request.form.get("email")
+        product = request.form.get("product")
         request_email.append(email)
-        crwal.test() # 크롤링을 흉내내는 5초 대기
-        print("크롤링 완료!")
-        sendmail(request_email)
-        print("메일 전송 완료")
-        print(request_email)
+        
+        p = multiprocessing.pool.ThreadPool(4)
+        a = p.apply(crwal.test,(product,))
+        b = p.apply(crwal.test,(product,))
+        # crwal.test(product),
+        # get_data_from_yeosin()
+
+        # print("크롤링 완료!")
+        # sendmail(request_email)
+        # print("메일 전송 완료")
+        # print(request_email)
     finally:
         request_email = []
         is_crawling = False  # 크롤링 종료 후 변수 값 변경
