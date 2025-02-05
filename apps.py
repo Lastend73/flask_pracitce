@@ -1,4 +1,3 @@
-import multiprocessing.pool
 from flask import Flask, render_template,request
 import crwal
 from send_mail_smtp import sendmail
@@ -31,7 +30,7 @@ def start_crawling():
         product = request.form.get("product")
         request_email.append(email)
 
-        crwal.gangnamunni_crawl()
+        # crwal.gangnamunni_crawl()
         get_data_from_yeosin(product)
 
         # print("크롤링 완료!")
