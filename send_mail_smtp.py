@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from email.utils import formataddr
-from important_data import get_app_password
+# from important_data import get_app_password
 
 
 HOST = "smtp-mail.outlook.com"
